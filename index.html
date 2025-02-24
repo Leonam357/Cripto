@@ -1,7 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="refresh" content="15"> <!-- Atualiza a cada 60 segundos -->
+    <meta http-equiv="refresh" content="20"> <!-- Atualiza a cada 20 segundos  o default é 60 segundos -->
+    <style>
+        body { 
+            margin: 0; 
+            background: transparent;
+            display: flex;
+            gap: 10px; /* Espaço entre os widgets */
+            padding: 10px;
+        }
+        .coinmarketcap-currency-widget { 
+            zoom: 0.8; /* Reduz o tamanho para caber 3 widgets */
+            flex: 1; /* Distribui o espaço igualmente */
+            min-width: 300px; /* Largura mínima de cada widget */
+        }
+    </style>
+</head>
+<body>
+    <!-- Bitcoin (ID 1) -->
+    <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
+     <!-- Moeda (Litecoin - ID 2) -->
+    <div class="coinmarketcap-currency-widget" 
+         data-currencyid="2" 
+         data-base="BRL" 
+         data-ticker="true" 
+         data-rank="true"></div>
+
+    <!-- Moeda (Bitcoin - ID 1) -->
+    <div class="coinmarketcap-currency-widget" 
+         data-currencyid="1" 
+         data-base="BRL" 
+         data-ticker="true" 
+         data-rank="true"></div>
+
+    <!-- Ethereum (ID 1027) -->
+    <div class="coinmarketcap-currency-widget" 
+         data-currencyid="1027" 
+         data-base="BRL" 
+         data-ticker="true" 
+         data-rank="true"></div>
+
+   
+</body>
+</html>
+
+
+    
+    <!--    original que funcionou para o litecoin
     <style>
         body { margin: 0; background: transparent; }
         .coinmarketcap-currency-widget { zoom: 0.9; }
@@ -16,3 +62,4 @@
          data-rank="true"></div>
 </body>
 </html>
+-->
