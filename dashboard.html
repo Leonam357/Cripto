@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <title>Investimentos em Cripto</title>
-    <meta http-equiv="refresh" content="60">
+    <meta http-equiv="refresh" content="45">
     <script defer src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
     <style>
         body {
@@ -14,23 +12,6 @@
             flex-direction: column;
             gap: 10px;
             font-family: Arial, sans-serif;
-            align-items: center;
-        }
-
-        .button {
-            padding: 3px;
-            width: 150px;
-            border: none;
-            border-radius: 5px;
-            background: #dc3545;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .button:hover {
-            background: #a11b28;
         }
 
         .widget-container {
@@ -38,15 +19,15 @@
             border-radius: 8px;
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 650px;
+            width: 600px;
             display: flex;
             gap: 10px;
-            align-items:left;
+            align-items: center;
         }
 
         .coin-info {
             flex: 1;
-            min-width: 120px;
+            min-width: 100px;
         }
 
         .calculation-section {
@@ -94,208 +75,68 @@
             display: block !important;
             border: none !important;
         }
-
     </style>
 </head>
 <body>
-    <h3>Bem-vindo, <span id="userDisplayName"></span>!</h3>
-    <!-- 
-    <div id="cryptoContainer"></div>
-
-        /* Litecoin */
-        <div class="widget-container">
-            <div class="coin-info">
-                <div class="coinmarketcap-currency-widget" 
-                     data-currencyid="2" 
-                     data-base="BRL" 
-                     data-ticker="true" 
-                     data-rank="true"></div>
-            </div>
-            <div class="calculation-section">
-                <div class="input-group">
-                    <label>Valor Investido (R$)</label>
-                    <input type="number" class="input-field invested" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Valor na Compra (R$)</label>
-                    <input type="number" class="input-field purchase-price" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Ganho Atual (R$)</label>
-                    <div class="result-field gain">0.00</div>
-                </div>
-            </div>
-        </div>
-    
-        /* Bitcoin */
-        <div class="widget-container">
-            <div class="coin-info">
-                <div class="coinmarketcap-currency-widget" 
-                     data-currencyid="1" 
-                     data-base="BRL" 
-                     data-ticker="true" 
-                     data-rank="true"></div>
-            </div>
-            <div class="calculation-section">
-                /* Mesma estrutura de inputs */
-                <div class="input-group">
-                    <label>Valor Investido (R$)</label>
-                    <input type="number" class="input-field invested" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Valor na Compra (R$)</label>
-                    <input type="number" class="input-field purchase-price" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Ganho Atual (R$)</label>
-                    <div class="result-field gain">0.00</div>
-                </div>
-            </div>
-        </div>
-    
-        /* Ethereum */
-        <div class="widget-container">
-            <div class="coin-info">
-                <div class="coinmarketcap-currency-widget" 
-                     data-currencyid="1027" 
-                     data-base="BRL" 
-                     data-ticker="true" 
-                     data-rank="true"></div>
-            </div>
-            <div class="calculation-section">*/
-                <div class="input-group">
-                    <label>Valor Investido (R$)</label>
-                    <input type="number" class="input-field invested" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Valor na Compra (R$)</label>
-                    <input type="number" class="input-field purchase-price" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Ganho Atual (R$)</label>
-                    <div class="result-field gain">0.00</div>
-                </div>
-            </div>
-        </div>  
-    -->
-        
     <div id="crypto-widgets"></div>
-  
-    <button class="button" onclick="logout()">Sair</button>
 
     <script>
-        let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
-
-        if (!currentUser) {
-            window.location.href = "login.html";
-        } else {
-            document.getElementById("userDisplayName").textContent = currentUser;
-            loadCryptoInputs();
-        }
-
-        function logout() {
-            localStorage.removeItem("savedUser");
-            sessionStorage.removeItem("currentUser");
-            window.close(); // Fecha a aba/janela do navegador ao sair
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
             loadCryptoWidgets();
         });
-        
-        function loadCryptoInputs() {
-            const cryptos = [
-                { id: "litecoin", name: "Litecoin", apiId: "litecoin", coinId: "2" },
-                { id: "bitcoin", name: "Bitcoin", apiId: "bitcoin", coinId: "1" },
-                { id: "ethereum", name: "Ethereum", apiId: "ethereum", coinId: "1027" }
+
+        function loadCryptoWidgets() {
+            const cryptoData = [
+                { id: 2, name: "Litecoin" },
+                { id: 1, name: "Bitcoin" },
+                { id: 1027, name: "Ethereum" }
             ];
-        let container = document.getElementById("crypto-widgets");
 
-        cryptoData.forEach(crypto => {
-            let widgetHTML = `
-                <div class="widget-container" data-currencyid="${crypto.id}">
-                    <div class="coin-info">
-                        <div class="coinmarketcap-currency-widget" 
-                            data-currencyid="${crypto.id}" 
-                            data-base="BRL" 
-                            data-ticker="true" 
-                            data-rank="true"></div>
-                    </div>
-                    <div class="calculation-section">
-                        <div class="input-group">
-                            <label>Valor Investido (R$)</label>
-                            <input type="number" class="input-field invested" min="0">
-                        </div>
-                        <div class="input-group">
-                            <label>Valor na Compra (R$)</label>
-                            <input type="number" class="input-field purchase-price" min="0">
-                        </div>
-                        <div class="input-group">
-                            <label>Ganho Atual (R$)</label>
-                            <div class="result-field gain">0.00</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.innerHTML += widgetHTML;
-        });
+            let container = document.getElementById("crypto-widgets");
 
-        reloadCoinMarketCapScript();
+            cryptoData.forEach(crypto => {
+                let widgetHTML = `
+                    <div class="widget-container" data-currencyid="${crypto.id}">
+                        <div class="coin-info">
+                            <div class="coinmarketcap-currency-widget" 
+                                data-currencyid="${crypto.id}" 
+                                data-base="BRL" 
+                                data-ticker="true" 
+                                data-rank="true"></div>
+                        </div>
+                        <div class="calculation-section">
+                            <div class="input-group">
+                                <label>Valor Investido (R$)</label>
+                                <input type="number" class="input-field invested" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label>Valor na Compra (R$)</label>
+                                <input type="number" class="input-field purchase-price" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label>Ganho Atual (R$)</label>
+                                <div class="result-field gain">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += widgetHTML;
+            });
+
+            reloadCoinMarketCapScript();
         }
+
         function reloadCoinMarketCapScript() {
             let oldScript = document.querySelector('script[src="https://files.coinmarketcap.com/static/widget/currency.js"]');
             if (oldScript) {
                 oldScript.remove();
-                }
-        
-            let newScript = document.createElement('script');
+            }
+
+            let newScript = document.createElement("script");
             newScript.src = "https://files.coinmarketcap.com/static/widget/currency.js";
             newScript.async = true;
             document.body.appendChild(newScript);
         }
-
-        function saveCryptoValue(currencyId, field, value) {
-            localStorage.setItem(`crypto_${currentUser}_${currencyId}_${field}`, value);
-            calculateGain(currencyId);
-        }
-
-        function fetchCurrentPrices() {
-            return fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,litecoin&vs_currencies=brl")
-                .then(response => response.json());
-        }
-
-        function calculateGain(currencyId) {
-            fetchCurrentPrices().then(prices => {
-                const invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_invested`)) || 0;
-                const qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_qtde`)) || 0;
-
-                const cryptoData = {
-                    litecoin: prices.litecoin?.brl,
-                    bitcoin: prices.bitcoin?.brl,
-                    ethereum: prices.ethereum?.brl
-                };
-
-                let currentPrice = cryptoData[currencyId] || 0;
-
-                if (currentPrice > 0) {
-                    let gain = (currentPrice * qtde) - invested;
-                    let formattedGain = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gain);
-
-                    document.getElementById(`gain_${currencyId}`).textContent = formattedGain;
-                    localStorage.setItem(`crypto_${currentUser}_${currencyId}_gain`, formattedGain);
-                }
-            });
-        }
-
-        function updateAllGains() {
-            ["litecoin", "bitcoin", "ethereum"].forEach(cryptoId => calculateGain(cryptoId));
-        }
-
-        window.onload = () => {
-            loadCryptoInputs();
-            updateAllGains();
-        };
     </script>
-
 </body>
 </html>
