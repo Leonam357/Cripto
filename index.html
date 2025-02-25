@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="refresh" content="45">
+    <meta http-equiv="refresh" content="5">
     <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
     <style>
         body {
@@ -120,7 +120,7 @@
                 <input type="number" class="input-field invested" min="0">
             </div>
             <div class="input-group">
-                <label>Valor da Moeda na Compra (R$)</label>
+                <label>Valor na Compra (R$)</label>
                 <input type="number" class="input-field purchase-price" min="0">
             </div>
             <div class="input-group">
@@ -146,7 +146,7 @@
                 <input type="number" class="input-field invested" min="0">
             </div>
             <div class="input-group">
-                <label>Valor da Moeda na Compra (R$)</label>
+                <label>Valor na Compra (R$)</label>
                 <input type="number" class="input-field purchase-price" min="0">
             </div>
             <div class="input-group">
@@ -174,31 +174,27 @@
             });
         }
 		
-        // Função de cálculo corrigida
-        function calculateGain() {
+        // Função para buscar o preço atual da moeda via API (usando CoinGecko)
+        function fetchCurrentPrice(currencyId) {
+            fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${currencyId}&vs_currencies=brl`)
+                .then(response => response.json())
+                .then(data => {
+                    const price = data[currencyId]?.brl || 0;
+                    updateGainField(currencyId, price);
+                });
+        }
+
+        // Função para atualizar o campo de ganho com o preço atual
+        function updateGainField(currencyId, currentPrice) {
             document.querySelectorAll('.widget-container').forEach(container => {
-                const currencyId = container.getAttribute('data-currencyid');
                 const investedInput = container.querySelector('.invested');
-                const priceInput = container.querySelector('.purchase-price');
+                const purchasePriceInput = container.querySelector('.purchase-price');
                 const gainField = container.querySelector('.gain');
 
                 const invested = parseFloat(investedInput.value) || 0;
-                const purchasePrice = parseFloat(priceInput.value) || 0;
-                
-                // Salva os valores modificados
-                saveToLocalStorage(currencyId, 'invested', investedInput.value);
-                saveToLocalStorage(currencyId, 'price', priceInput.value);
+                const purchasePrice = parseFloat(purchasePriceInput.value) || 0;
 
-                // Busca o preço atual corretamente
-                const priceElement = container.querySelector('.coinmarketcap-currency-widget [data-brazilian]');
-                const currentPrice = priceElement ? 
-                    parseFloat(
-                        priceElement.textContent
-                            .replace('R$', '')
-                            .replace(/\./g, '')
-                            .replace(',', '.')
-                    ) : 0;
-
+                // Calcula o ganho
                 let gain = 0;
                 if (invested > 0 && purchasePrice > 0 && currentPrice > 0) {
                     const quantity = invested / purchasePrice;
@@ -212,14 +208,13 @@
             });
         }
 
-        // Event listeners corrigidos
+        // Event listeners para os campos de input
         document.querySelectorAll('.input-field').forEach(input => {
             input.addEventListener('input', () => {
-                // Só calcula se ambos campos estão preenchidos
                 const container = input.closest('.widget-container');
                 const invested = container.querySelector('.invested').value;
                 const price = container.querySelector('.purchase-price').value;
-                
+
                 if (invested && price) {
                     calculateGain();
                 } else {
@@ -228,7 +223,7 @@
             });
         });
 
-        // Carrega dados ao iniciar
+        // Carregar os dados do localStorage ao iniciar
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage();
             calculateGain();
