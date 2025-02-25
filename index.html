@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="refresh" content="60"> <!-- Atualiza a cada 20 segundos  o default é 60 segundos -->
-    <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script> <!-- MOVIDO PARA O HEAD -->
-
+    <meta http-equiv="refresh" content="30">
+    <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
     <style>
         body {
             margin: 0;
@@ -11,17 +10,60 @@
             background: transparent;
             display: flex;
             flex-direction: column;
-            gap: 15px; 
+            gap: 15px;
+            font-family: Arial, sans-serif;
         }
 
         .widget-container {
-            background: rgba(255, 255, 255, 0.6); 
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
-            padding: 10px;
+            padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 300px; 
-            .widget-container {
-            border: 1px solid rgba(0,0,0,0.1);
+            width: 650px; /* Aumentado para caber ambas as colunas */
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .coin-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .calculation-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-left: 20px;
+            border-left: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .input-field {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .result-field {
+            padding: 8px;
+            background: #f8f8f8;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #333;
         }
 
         .coinmarketcap-currency-widget {
@@ -34,29 +76,121 @@
 <body>
     <!-- Litecoin -->
     <div class="widget-container">
-        <div class="coinmarketcap-currency-widget" 
-             data-currencyid="2" 
-             data-base="BRL" 
-             data-ticker="true" 
-             data-rank="true"></div>
+        <div class="coin-info">
+            <div class="coinmarketcap-currency-widget" 
+                 data-currencyid="2" 
+                 data-base="BRL" 
+                 data-ticker="true" 
+                 data-rank="true"></div>
+        </div>
+        <div class="calculation-section">
+            <div class="input-group">
+                <label>Valor Investido (R$)</label>
+                <input type="number" class="input-field invested" min="0">
+            </div>
+            <div class="input-group">
+                <label>Valor da Moeda na Compra (R$)</label>
+                <input type="number" class="input-field purchase-price" min="0">
+            </div>
+            <div class="input-group">
+                <label>Ganho Atual (R$)</label>
+                <div class="result-field gain">0.00</div>
+            </div>
+        </div>
     </div>
-    
+
     <!-- Bitcoin -->
     <div class="widget-container">
-        <div class="coinmarketcap-currency-widget" 
-             data-currencyid="1" 
-             data-base="BRL" 
-             data-ticker="true" 
-             data-rank="true"></div>
+        <div class="coin-info">
+            <div class="coinmarketcap-currency-widget" 
+                 data-currencyid="1" 
+                 data-base="BRL" 
+                 data-ticker="true" 
+                 data-rank="true"></div>
+        </div>
+        <div class="calculation-section">
+            <!-- Mesma estrutura de inputs -->
+            <div class="input-group">
+                <label>Valor Investido (R$)</label>
+                <input type="number" class="input-field invested" min="0">
+            </div>
+            <div class="input-group">
+                <label>Valor da Moeda na Compra (R$)</label>
+                <input type="number" class="input-field purchase-price" min="0">
+            </div>
+            <div class="input-group">
+                <label>Ganho Atual (R$)</label>
+                <div class="result-field gain">0.00</div>
+            </div>
+        </div>
     </div>
 
     <!-- Ethereum -->
     <div class="widget-container">
-        <div class="coinmarketcap-currency-widget" 
-             data-currencyid="1027" 
-             data-base="BRL" 
-             data-ticker="true" 
-             data-rank="true"></div>
+        <div class="coin-info">
+            <div class="coinmarketcap-currency-widget" 
+                 data-currencyid="1027" 
+                 data-base="BRL" 
+                 data-ticker="true" 
+                 data-rank="true"></div>
+        </div>
+        <div class="calculation-section">
+            <!-- Mesma estrutura de inputs -->
+            <div class="input-group">
+                <label>Valor Investido (R$)</label>
+                <input type="number" class="input-field invested" min="0">
+            </div>
+            <div class="input-group">
+                <label>Valor da Moeda na Compra (R$)</label>
+                <input type="number" class="input-field purchase-price" min="0">
+            </div>
+            <div class="input-group">
+                <label>Ganho Atual (R$)</label>
+                <div class="result-field gain">0.00</div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Função para formatar valores monetários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        // Função principal de cálculo
+        function calculateGain() {
+            document.querySelectorAll('.widget-container').forEach(container => {
+                const invested = parseFloat(container.querySelector('.invested').value) || 0;
+                const purchasePrice = parseFloat(container.querySelector('.purchase-price').value) || 0;
+                const currentPrice = parseFloat(
+                    container.querySelector('.coinmarketcap-currency-widget')
+                        .querySelector('[data-brazilian]')
+                        .textContent
+                        .replace('R$', '')
+                        .replace('.', '')
+                        .replace(',', '.')
+                ) || 0;
+
+                let gain = 0;
+                if (purchasePrice > 0 && invested > 0) {
+                    const quantity = invested / purchasePrice;
+                    gain = (quantity * currentPrice) - invested;
+                }
+
+                container.querySelector('.gain').textContent = formatCurrency(gain);
+            });
+        }
+
+        // Atualiza cálculos quando qualquer input muda
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('input', calculateGain);
+        });
+
+        // Calcula inicialmente ao carregar
+        calculateGain();
+    </script>
 </body>
 </html>
