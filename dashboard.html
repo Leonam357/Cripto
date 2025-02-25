@@ -99,7 +99,7 @@
 </head>
 <body>
     <h3>Bem-vindo, <span id="userDisplayName"></span>!</h3>
-    
+    <!-- 
     <div id="cryptoContainer"></div>
 
         /* Litecoin */
@@ -177,6 +177,7 @@
                 </div>
             </div>
         </div>  
+    -->
         
     <div id="cryptoContainer"></div>
   
@@ -243,6 +244,19 @@
 
             updateAllGains();
         }
+        function reloadCoinMarketCapScript() {
+            let oldScript = document.querySelector('script[src="https://files.coinmarketcap.com/static/widget/currency.js"]');
+            if (oldScript) {
+                oldScript.remove();
+                }
+        
+            let newScript = document.createElement('script');
+            newScript.src = "https://files.coinmarketcap.com/static/widget/currency.js";
+            newScript.async = true;
+            document.body.appendChild(newScript);
+        }
+        loadCryptoInputs();
+        reloadCoinMarketCapScript();
 
         function saveCryptoValue(currencyId, field, value) {
             localStorage.setItem(`crypto_${currentUser}_${currencyId}_${field}`, value);
