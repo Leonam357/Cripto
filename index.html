@@ -1,233 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <meta http-equiv="refresh" content="45">
-    <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
+    <meta charset="UTF-8">
+    <title>Login - Investimentos Cripto</title>
     <style>
-        body {
-            margin: 0;
-            padding: 10px;
-            background: transparent;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-family: Arial, sans-serif;
-        }
-
-        .widget-container {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 600px; /* Aumentado para caber ambas as colunas */
-            /* height: 1000px; */
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .coin-info {
-            flex: 1;
-            min-width: 100px;
-        }
-
-        .calculation-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding-left: 10px;
-            border-left: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            width: 150px; /* largura dos campos de input */
-        }
-
-        .input-group label {        /*label do input*/
-            font-size: 0.9em;
-            padding-left: 1px;     /*deslocamento do texto do label do input*/
-            color: #666;
-        }
-
-        .input-field {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9em;
-			max-width: 200px; 		/* Largura 200 */
-        }
-
-        .result-field {
-            padding: 8px;
-            background: #f8f8f8;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            font-size: 0.9em;
-            color: #333;
-            max-width: 200px; 		/* Largura 200 */
-        }
-
-        .coinmarketcap-currency-widget {
-            width: 100% !important;
-            display: block !important;
-            border: none !important;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 10px; }
+        .login-container { max-width: 400px; margin: auto; padding: 10px; border: 1px solid #ccc; border-radius: 10px; background: #f9f9f9; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 0.9em; margin-bottom: 5px; }
+        .input-group input { width: 380px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .button { padding: 8px; width: 100px; border: none; border-radius: 5px; background: #28a745; color: white; font-size: 1em; cursor: pointer; }
+        .button:hover { background: #2c8f43; }
     </style>
 </head>
 <body>
-    <!-- Litecoin -->
-    <div class="widget-container">
-        <div class="coin-info">
-            <div class="coinmarketcap-currency-widget" 
-                 data-currencyid="2" 
-                 data-base="BRL" 
-                 data-ticker="true" 
-                 data-rank="true"></div>
-        </div>
-        <div class="calculation-section">
-            <div class="input-group">
-                <label>Valor Investido (R$)</label>
-                <input type="number" class="input-field invested" min="0">
-            </div>
-            <div class="input-group">
-                <label>Valor na Compra (R$)</label>
-                <input type="number" class="input-field purchase-price" min="0">
-            </div>
-            <div class="input-group">
-                <label>Ganho Atual (R$)</label>
-                <div class="result-field gain">0.00</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Bitcoin -->
-    <div class="widget-container">
-        <div class="coin-info">
-            <div class="coinmarketcap-currency-widget" 
-                 data-currencyid="1" 
-                 data-base="BRL" 
-                 data-ticker="true" 
-                 data-rank="true"></div>
+    <div class="login-container">
+        <h2>Faça login</h2>
+        <div class="input-group">
+            <label>Nome de Usuário:</label>
+            <input type="text" id="username">
         </div>
-        <div class="calculation-section">
-            <!-- Mesma estrutura de inputs -->
-            <div class="input-group">
-                <label>Valor Investido (R$)</label>
-                <input type="number" class="input-field invested" min="0">
-            </div>
-            <div class="input-group">
-                <label>Valor na Compra (R$)</label>
-                <input type="number" class="input-field purchase-price" min="0">
-            </div>
-            <div class="input-group">
-                <label>Ganho Atual (R$)</label>
-                <div class="result-field gain">0.00</div>
-            </div>
+        <div class="input-group">
+            <label>Senha:</label>
+            <input type="password" id="password">
         </div>
-    </div>
-
-    <!-- Ethereum -->
-    <div class="widget-container">
-        <div class="coin-info">
-            <div class="coinmarketcap-currency-widget" 
-                 data-currencyid="1027" 
-                 data-base="BRL" 
-                 data-ticker="true" 
-                 data-rank="true"></div>
+        <div class="input-group">
+            <label><input type="checkbox" id="keepLoggedIn"> Manter-me logado</label>
         </div>
-        <div class="calculation-section">
-            <!-- Mesma estrutura de inputs -->
-            <div class="input-group">
-                <label>Valor Investido (R$)</label>
-                <input type="number" class="input-field invested" min="0">
-            </div>
-            <div class="input-group">
-                <label>Valor na Compra (R$)</label>
-                <input type="number" class="input-field purchase-price" min="0">
-            </div>
-            <div class="input-group">
-                <label>Ganho Atual (R$)</label>
-                <div class="result-field gain">0.00</div>
-            </div>
-        </div>
+        <button class="button" onclick="login()">Entrar</button>
     </div>
 
     <script>
-		// Função para salvar dados no localStorage
-        function saveToLocalStorage(currencyId, field, value) {
-            localStorage.setItem(`crypto_${currencyId}_${field}`, value);
-        }
-		
-		// Função para carregar dados do localStorage
-        function loadFromLocalStorage() {
-            document.querySelectorAll('.widget-container').forEach(container => {
-                const currencyId = container.getAttribute('data-currencyid');
-                const investedInput = container.querySelector('.invested');
-                const priceInput = container.querySelector('.purchase-price');
-
-                investedInput.value = localStorage.getItem(`crypto_${currencyId}_invested`) || '';
-                priceInput.value = localStorage.getItem(`crypto_${currencyId}_price`) || '';
-            });
-        }
-		
-        // Função para buscar o preço atual da moeda via API (usando CoinGecko)
-        function fetchCurrentPrice(currencyId) {
-            fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${currencyId}&vs_currencies=brl`)
-                .then(response => response.json())
-                .then(data => {
-                    const price = data[currencyId]?.brl || 0;
-                    updateGainField(currencyId, price);
-                });
+        // Verifica se o usuário já está logado e redireciona automaticamente
+        if (localStorage.getItem("savedUser")) {
+            window.location.href = "dashboard.html";
         }
 
-        // Função para atualizar o campo de ganho com o preço atual
-        function updateGainField(currencyId, currentPrice) {
-            document.querySelectorAll('.widget-container').forEach(container => {
-                const investedInput = container.querySelector('.invested');
-                const purchasePriceInput = container.querySelector('.purchase-price');
-                const gainField = container.querySelector('.gain');
+        function login() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const keepLoggedIn = document.getElementById("keepLoggedIn").checked;
 
-                const invested = parseFloat(investedInput.value) || 0;
-                const purchasePrice = parseFloat(purchasePriceInput.value) || 0;
+            if (username === "" || password === "") {
+                alert("Preencha nome e senha!");
+                return;
+            }
 
-                // Calcula o ganho
-                let gain = 0;
-                if (invested > 0 && purchasePrice > 0 && currentPrice > 0) {
-                    const quantity = invested / purchasePrice;
-                    gain = (quantity * currentPrice) - invested;
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (users[username]) {
+                if (users[username] !== password) {
+                    alert("Senha incorreta!");
+                    return;
                 }
+            } else {
+                users[username] = password;
+                localStorage.setItem("users", JSON.stringify(users));
+            }
 
-                gainField.textContent = new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                }).format(gain);
-            });
+            if (keepLoggedIn) {
+                localStorage.setItem("savedUser", username);
+            }
+
+            sessionStorage.setItem("currentUser", username);
+            window.location.href = "dashboard.html";
+
         }
-
-        // Event listeners para os campos de input
-        document.querySelectorAll('.input-field').forEach(input => {
-            input.addEventListener('input', () => {
-                const container = input.closest('.widget-container');
-                const invested = container.querySelector('.invested').value;
-                const price = container.querySelector('.purchase-price').value;
-
-                if (invested && price) {
-                    calculateGain();
-                } else {
-                    container.querySelector('.gain').textContent = 'R$ 0,00';
-                }
-            });
-        });
-
-        // Carregar os dados do localStorage ao iniciar
-        window.addEventListener('DOMContentLoaded', () => {
-            loadFromLocalStorage();
-            calculateGain();
-        });
+        
     </script>
+
 </body>
 </html>
