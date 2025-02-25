@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="refresh" content="30">
+    <meta http-equiv="refresh" content="5">
     <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
     <style>
         body {
@@ -10,24 +10,25 @@
             background: transparent;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             font-family: Arial, sans-serif;
         }
 
         .widget-container {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 650px; /* Aumentado para caber ambas as colunas */
+            width: 600px; /* Aumentado para caber ambas as colunas */
+            /* height: 1000px; */
             display: flex;
-            gap: 20px;
+            gap: 10px;
             align-items: center;
         }
 
         .coin-info {
             flex: 1;
-            min-width: 250px;
+            min-width: 100px;
         }
 
         .calculation-section {
@@ -35,7 +36,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding-left: 20px;
+            padding-left: 10px;
             border-left: 1px solid rgba(0,0,0,0.1);
         }
 
@@ -43,10 +44,12 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            width: 150px; /* largura dos campos de input */
         }
 
-        .input-group label {
+        .input-group label {        /*label do input*/
             font-size: 0.9em;
+            padding-left: 1px;     /*deslocamento do texto do label do input*/
             color: #666;
         }
 
@@ -55,6 +58,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 0.9em;
+			max-width: 200px; 		/* Largura 200 */
         }
 
         .result-field {
@@ -64,6 +68,7 @@
             border-radius: 4px;
             font-size: 0.9em;
             color: #333;
+            max-width: 200px; 		/* Largura 200 */
         }
 
         .coinmarketcap-currency-widget {
@@ -89,7 +94,7 @@
                 <input type="number" class="input-field invested" min="0">
             </div>
             <div class="input-group">
-                <label>Valor da Moeda na Compra (R$)</label>
+                <label>Valor na Compra (R$)</label>
                 <input type="number" class="input-field purchase-price" min="0">
             </div>
             <div class="input-group">
@@ -152,45 +157,82 @@
     </div>
 
     <script>
-        // Função para formatar valores monetários
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(value);
+		// Função para salvar dados no localStorage
+        function saveToLocalStorage(currencyId, field, value) {
+            localStorage.setItem(`crypto_${currencyId}_${field}`, value);
         }
+		
+		// Função para carregar dados do localStorage
+        function loadFromLocalStorage() {
+            document.querySelectorAll('.widget-container').forEach(container => {
+                const currencyId = container.getAttribute('data-currencyid');
+                const investedInput = container.querySelector('.invested');
+                const priceInput = container.querySelector('.purchase-price');
 
-        // Função principal de cálculo
+                investedInput.value = localStorage.getItem(`crypto_${currencyId}_invested`) || '';
+                priceInput.value = localStorage.getItem(`crypto_${currencyId}_price`) || '';
+            });
+        }
+		
+        // Função de cálculo corrigida
         function calculateGain() {
             document.querySelectorAll('.widget-container').forEach(container => {
-                const invested = parseFloat(container.querySelector('.invested').value) || 0;
-                const purchasePrice = parseFloat(container.querySelector('.purchase-price').value) || 0;
-                const currentPrice = parseFloat(
-                    container.querySelector('.coinmarketcap-currency-widget')
-                        .querySelector('[data-brazilian]')
-                        .textContent
-                        .replace('R$', '')
-                        .replace('.', '')
-                        .replace(',', '.')
-                ) || 0;
+                const currencyId = container.getAttribute('data-currencyid');
+                const investedInput = container.querySelector('.invested');
+                const priceInput = container.querySelector('.purchase-price');
+                const gainField = container.querySelector('.gain');
+
+                const invested = parseFloat(investedInput.value) || 0;
+                const purchasePrice = parseFloat(priceInput.value) || 0;
+                
+                // Salva os valores modificados
+                saveToLocalStorage(currencyId, 'invested', investedInput.value);
+                saveToLocalStorage(currencyId, 'price', priceInput.value);
+
+                // Busca o preço atual corretamente
+                const priceElement = container.querySelector('.coinmarketcap-currency-widget [data-brazilian]');
+                const currentPrice = priceElement ? 
+                    parseFloat(
+                        priceElement.textContent
+                            .replace('R$', '')
+                            .replace(/\./g, '')
+                            .replace(',', '.')
+                    ) : 0;
 
                 let gain = 0;
-                if (purchasePrice > 0 && invested > 0) {
+                if (invested > 0 && purchasePrice > 0 && currentPrice > 0) {
                     const quantity = invested / purchasePrice;
                     gain = (quantity * currentPrice) - invested;
                 }
 
-                container.querySelector('.gain').textContent = formatCurrency(gain);
+                gainField.textContent = new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(gain);
             });
         }
 
-        // Atualiza cálculos quando qualquer input muda
+        // Event listeners corrigidos
         document.querySelectorAll('.input-field').forEach(input => {
-            input.addEventListener('input', calculateGain);
+            input.addEventListener('input', () => {
+                // Só calcula se ambos campos estão preenchidos
+                const container = input.closest('.widget-container');
+                const invested = container.querySelector('.invested').value;
+                const price = container.querySelector('.purchase-price').value;
+                
+                if (invested && price) {
+                    calculateGain();
+                } else {
+                    container.querySelector('.gain').textContent = 'R$ 0,00';
+                }
+            });
         });
 
-        // Calcula inicialmente ao carregar
-        calculateGain();
+        // Carrega dados ao iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            calculateGain();
+        });
     </script>
 </body>
 </html>
