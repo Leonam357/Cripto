@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Investimentos Cripto</title>
+    <title>Investimentos em Cripto</title>
     <meta http-equiv="refresh" content="60">
     <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
     <style>
@@ -18,7 +18,7 @@
         }
 
         .button {
-            padding: 10px;
+            padding: 3px;
             width: 150px;
             border: none;
             border-radius: 5px;
@@ -26,11 +26,11 @@
             color: white;
             font-size: 1em;
             cursor: pointer;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .button:hover {
-            background: #c82333;
+            background: #a11b28;
         }
 
         .widget-container {
@@ -38,15 +38,15 @@
             border-radius: 8px;
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 600px;
+            width: 650px;
             display: flex;
             gap: 10px;
-            align-items: center;
+            align-items:left;
         }
 
         .coin-info {
             flex: 1;
-            min-width: 100px;
+            min-width: 120px;
         }
 
         .calculation-section {
@@ -88,14 +88,100 @@
             color: #333;
             max-width: 200px;
         }
+
+        .coinmarketcap-currency-widget {
+            width: 100% !important;
+            display: block !important;
+            border: none !important;
+        }
+
     </style>
 </head>
 <body>
-
-    <h2>Bem-vindo, <span id="userDisplayName"></span>!</h2>
-    <button class="button" onclick="logout()">Sair</button>
-
+    <h3>Bem-vindo, <span id="userDisplayName"></span>!</h3>
+    <!--
     <div id="cryptoContainer"></div>
+
+        /* Litecoin */
+        <div class="widget-container">
+            <div class="coin-info">
+                <div class="coinmarketcap-currency-widget" 
+                     data-currencyid="2" 
+                     data-base="BRL" 
+                     data-ticker="true" 
+                     data-rank="true"></div>
+            </div>
+            <div class="calculation-section">
+                <div class="input-group">
+                    <label>Valor Investido (R$)</label>
+                    <input type="number" class="input-field invested" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Valor na Compra (R$)</label>
+                    <input type="number" class="input-field purchase-price" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Ganho Atual (R$)</label>
+                    <div class="result-field gain">0.00</div>
+                </div>
+            </div>
+        </div>
+    
+        /* Bitcoin */
+        <div class="widget-container">
+            <div class="coin-info">
+                <div class="coinmarketcap-currency-widget" 
+                     data-currencyid="1" 
+                     data-base="BRL" 
+                     data-ticker="true" 
+                     data-rank="true"></div>
+            </div>
+            <div class="calculation-section">
+                /* Mesma estrutura de inputs */
+                <div class="input-group">
+                    <label>Valor Investido (R$)</label>
+                    <input type="number" class="input-field invested" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Valor na Compra (R$)</label>
+                    <input type="number" class="input-field purchase-price" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Ganho Atual (R$)</label>
+                    <div class="result-field gain">0.00</div>
+                </div>
+            </div>
+        </div>
+    
+        /* Ethereum */
+        <div class="widget-container">
+            <div class="coin-info">
+                <div class="coinmarketcap-currency-widget" 
+                     data-currencyid="1027" 
+                     data-base="BRL" 
+                     data-ticker="true" 
+                     data-rank="true"></div>
+            </div>
+            <div class="calculation-section">*/
+                <div class="input-group">
+                    <label>Valor Investido (R$)</label>
+                    <input type="number" class="input-field invested" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Valor na Compra (R$)</label>
+                    <input type="number" class="input-field purchase-price" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Ganho Atual (R$)</label>
+                    <div class="result-field gain">0.00</div>
+                </div>
+            </div>
+        </div>  
+    -->
+    
+    <div id="cryptoContainer"></div>
+  
+    <button class="button" onclick="logout()">Sair</button>
 
     <script>
         let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
