@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Investimentos Cripto</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 10px; }
+        .login-container { max-width: 400px; margin: auto; padding: 10px; border: 1px solid #ccc; border-radius: 10px; background: #f9f9f9; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 0.9em; margin-bottom: 5px; }
+        .input-group input { width: 380px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .button { padding: 8px; width: 100px; border: none; border-radius: 5px; background: #28a745; color: white; font-size: 1em; cursor: pointer; }
+        .button:hover { background: #2c8f43; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Faça login</h2>
+        <div class="input-group">
+            <label>Nome de Usuário:</label>
+            <input type="text" id="username">
+        </div>
+        <div class="input-group">
+            <label>Senha:</label>
+            <input type="password" id="password">
+        </div>
+        <div class="input-group">
+            <label><input type="checkbox" id="keepLoggedIn"> Manter-me logado</label>
+        </div>
+        <button class="button" onclick="login()">Entrar</button>
+    </div>
+
+    <script>
+        // Verifica se o usuário já está logado e redireciona automaticamente
+        if (localStorage.getItem("savedUser")) {
+            window.location.href = "dashboard.html";
+        }
+
+        function login() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const keepLoggedIn = document.getElementById("keepLoggedIn").checked;
+
+            if (username === "" || password === "") {
+                alert("Preencha nome e senha!");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (users[username]) {
+                if (users[username] !== password) {
+                    alert("Senha incorreta!");
+                    return;
+                }
+            } else {
+                users[username] = password;
+                localStorage.setItem("users", JSON.stringify(users));
+            }
+
+            if (keepLoggedIn) {
+                localStorage.setItem("savedUser", username);
+            }
+
+            sessionStorage.setItem("currentUser", username);
+            window.location.href = "dashboard.html";
+
+        }
+        
+    </script>
+
+</body>
+</html>
