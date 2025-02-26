@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Investimentos em Cripto</title>
-    <meta http-equiv="refresh" content="60">
     <script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
     <style>
         body {
@@ -16,6 +15,7 @@
             font-family: Arial, sans-serif;
             align-items: center;
         }
+
         .button {
             padding: 3px;
             width: 150px;
@@ -108,6 +108,14 @@
     <button class="button" onclick="logout()">Sair</button>
 
     <script>
+        let refreshTimer;
+
+        function startAutoRefresh() {
+            refreshTimer = setTimeout(() => {
+                location.reload();
+            }, 60000);      // refresh de tela a cada 60 segundos (1 minuto)
+        }
+
         let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
 
         if (!currentUser) {
@@ -118,9 +126,15 @@
         }
 
         function logout() {
+            /* <meta http-equiv="refresh" content="60"> */
+            clearTimeout(refreshTimer); // Para a atualização automática
             localStorage.removeItem("savedUser");
             sessionStorage.removeItem("currentUser");
-            window.close(); // Fecha a aba/janela do navegador ao sair
+            window.location.href = "index.html"; // Redireciona imediatamente para a tela de login
+
+            setTimeout(() => {
+                window.close(); // Fecha a aba (se permitido pelo navegador)
+            }, 1000);
         }
 
         function loadCryptoInputs() {
