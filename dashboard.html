@@ -17,22 +17,6 @@
             align-items: center;
         }
 
-        .button {
-            padding: 3px;
-            width: 150px;
-            border: none;
-            border-radius: 5px;
-            background: #dc3545;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .button:hover {
-            background: #a11b28;
-        }
-
         .widget-container {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
@@ -106,8 +90,6 @@
     
     <div id="cryptoContainer"></div>
   
-    <button class="button" onclick="logout()">Sair</button>
-
     <script>
         let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
 
