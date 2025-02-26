@@ -7,13 +7,27 @@
     <style>
         body {
             margin: 0;
-            padding: 10px;
+            padding: 5px;
             background: transparent;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 5px;
             font-family: Arial, sans-serif;
             align-items: center;
+        }
+
+        .header-container {
+            display:inline;
+            justify-content:center;
+            align-items: center;
+            width: 450px;
+            margin-bottom: 1px;
+        }
+
+        .timer {
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
         }
 
         .button {
@@ -35,9 +49,9 @@
         .widget-container {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
-            padding: 10px;
+            padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 650px;
+            width: 575px;
             display: flex;
             gap: 10px;
             align-items:left;
@@ -101,40 +115,70 @@
     </style>
 </head>
 <body>
-    <h3>Bem-vindo, <span id="userDisplayName"></span>!</h3>
-    
+    <div class="header-container">
+        <h3>Bem-vindo, <span id="userDisplayName"></span></h3> </h6>(atualiza em: <span class="timer" id="timerDisplay">00:45</span>)</h5>
+    </div>
     <div id="cryptoContainer"></div>
-  
+
     <button class="button" onclick="logout()">Sair</button>
 
     <script>
         let refreshTimer;
+        let countdownTimer;
+        const refreshInterval = 30; // Tempo em segundos
+        let countdown = refreshInterval;
 
         function startAutoRefresh() {
             refreshTimer = setTimeout(() => {
                 location.reload();
-            }, 60000);      // refresh de tela a cada 60 segundos (1 minuto)
+            }, refreshInterval * 1000);
+        }
+
+        function startCountdown() {
+            countdown = refreshInterval;
+            updateCountdownDisplay();
+
+            countdownTimer = setInterval(() => {
+                countdown--;
+                updateCountdownDisplay();
+
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    countdown = refreshInterval;
+                    startCountdown();
+                }
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            let minutes = Math.floor(countdown / 60);
+            let seconds = countdown % 60;
+            document.getElementById("timerDisplay").textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
 
         if (!currentUser) {
-            window.location.href = "login.html";
+            window.location.href = "index.html";
         } else {
             document.getElementById("userDisplayName").textContent = currentUser;
             loadCryptoInputs();
+            startAutoRefresh(); // Inicia a contagem do refresh
+            startCountdown(); // Inicia a contagem regressiva
         }
 
         function logout() {
             /* <meta http-equiv="refresh" content="60"> */
             clearTimeout(refreshTimer); // Para a atualização automática
+            clearInterval(countdownTimer); // Para o contador regressivo
             localStorage.removeItem("savedUser");
             sessionStorage.removeItem("currentUser");
             window.location.href = "index.html"; // Redireciona imediatamente para a tela de login
 
             setTimeout(() => {
                 window.close(); // Fecha a aba (se permitido pelo navegador)
-            }, 500);
+            }, 1000);
         }
 
         function loadCryptoInputs() {
