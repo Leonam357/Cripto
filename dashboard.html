@@ -91,7 +91,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 0.9em;
-            max-width: 200px;
+            max-width: 150px;
             height: 8px;
         }
 
@@ -112,23 +112,59 @@
             border: none !important;
         }
 
+        .alert {
+            color:white !important;
+            background-color: #9c34a0 !important;
+        }
+
+        .alert-gain {
+            color:white !important;
+            background-color: #9c34a0 !important;
+        }
+
+        .positive {
+            color: #28a745 !important;
+            background-color: #dff5e1 !important;
+            border-color: #bae4c4 !important;
+        }
+
+        .negative {
+            color: #dc3545 !important;
+            background-color: #f8ccd0 !important;
+            border-color: #f0bbc0 !important;
+        }
     </style>
 </head>
 <body>
     <div class="header-container">
-        <h3>Bem-vindo, <span id="userDisplayName"></span></h3> </h6>(atualiza em: <span class="timer" id="timerDisplay">00:45</span>)</h5>
+        <h3>Bem-vindo, <span id="userDisplayName"></span></h3>
+        <p><font size="2px">(atualiza em: <span class="timer" id="timerDisplay">01:00</span>)<br />
+        <label for="minPrice">Alerta preço mín(R$):</label>
+        <input type="number" id="minPrice" class="input-field" placeholder="Mínimo" onchange="setPriceAlerts()"><br />
+        <label for="maxPrice">Alerta preço máx(R$):</label>
+        <input type="number" id="maxPrice" class="input-field" placeholder="Máximo" onchange="setPriceAlerts()"></font></p>
     </div>
-    <div id="cryptoContainer"></div>
+    <button class="button" id="stopAlarmButton" onclick="stopAlarm()">Para Alarme</button>
 
+    <div id="cryptoContainer"></div>
+            
     <button class="button" onclick="logout()">Sair</button>
+
+    <audio id="alarmSound" loop>
+        <source src="quain.mp3" type="audio/mpeg">
+        Seu navegador não suporta áudio.
+    </audio>
 
     <script>
         let refreshTimer;
         let countdownTimer;
-        //------------Ajuste do Tempo de refresh em segundos-----------------------------------------------------------
-        const refreshInterval = 60; // Tempo em segundos
-        //-------------------------------------------------------------------------------------------------------------
+        const refreshInterval = 60;
         let countdown = refreshInterval;
+
+        let minPriceAlert = null;
+        let maxPriceAlert = null;
+        let alarmPlaying = false;
+        let lastState = { min: {}, max: {} };
 
         function startAutoRefresh() {
             refreshTimer = setTimeout(() => {
@@ -159,27 +195,119 @@
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
+        function loadPriceAlerts() {
+            const savedMinPrice = localStorage.getItem('minPriceAlert');
+            const savedMaxPrice = localStorage.getItem('maxPriceAlert');
+
+            if (savedMinPrice) {
+                document.getElementById('minPrice').value = savedMinPrice;
+                minPriceAlert = parseFloat(savedMinPrice);
+            }
+
+            if (savedMaxPrice) {
+                document.getElementById('maxPrice').value = savedMaxPrice;
+                maxPriceAlert = parseFloat(savedMaxPrice);
+            }
+        }
+
+        function setPriceAlerts() {
+            minPriceAlert = parseFloat(document.getElementById('minPrice').value) || null;
+            maxPriceAlert = parseFloat(document.getElementById('maxPrice').value) || null;
+
+            localStorage.setItem('minPriceAlert', minPriceAlert || '');
+            localStorage.setItem('maxPriceAlert', maxPriceAlert || '');
+        }
+        
+        function triggerAlarm(type, currencyId) {
+            if (!alarmPlaying) {
+                document.getElementById('alarmSound').play();
+                document.getElementById('stopAlarmButton').style.display = "block";
+                alarmPlaying = true;
+            }
+
+            if (type === 'min') {
+                document.getElementById('minPrice').classList.add("alert");
+            } else if (type === 'max') {
+                document.getElementById('maxPrice').classList.add("alert");
+            }
+
+            const gainElement = document.getElementById(`gain_${currencyId}`);
+            if (gainElement) gainElement.classList.add("alert-gain");
+        }
+
+        function stopAlarm() {
+            document.getElementById('alarmSound').pause();
+            document.getElementById('alarmSound').currentTime = 0;
+            document.getElementById('stopAlarmButton').style.display = "none";
+            alarmPlaying = false;
+
+            document.getElementById('minPrice').classList.remove("alert");
+            document.getElementById('maxPrice').classList.remove("alert");
+            document.querySelectorAll('.gain').forEach(el => el.classList.remove("alert-gain"));
+
+            // Atualiza os estados para prevenir retrigger imediato
+            fetchCurrentPrices().then(prices => {
+                ["litecoin", "bitcoin", "ethereum"].forEach(currencyId => {
+                    const currentPrice = prices[currencyId]?.brl;
+                    if (currentPrice) {
+                        // Atualiza lastState.min para true apenas se ainda estiver abaixo do mínimo
+                        lastState.min[currencyId] = (minPriceAlert && currentPrice < minPriceAlert);
+                        // Atualiza lastState.max para true apenas se ainda estiver acima do máximo
+                        lastState.max[currencyId] = (maxPriceAlert && currentPrice > maxPriceAlert);
+                    }
+                });
+            });
+        }
+
+        function checkPriceAlerts(currentPrice, currencyId) {
+            // Lógica para mínimo
+            if (minPriceAlert) {
+                if (currentPrice < minPriceAlert) {
+                    if (!lastState.min[currencyId]) {
+                        triggerAlarm('min', currencyId);
+                        lastState.min[currencyId] = true;
+                    }
+                } else {
+                    // Resetar estado quando voltar acima do mínimo
+                    lastState.min[currencyId] = false;
+                }
+            }
+
+            // Lógica para máximo
+            if (maxPriceAlert) {
+                if (currentPrice > maxPriceAlert) {
+                    if (!lastState.max[currencyId]) {
+                        triggerAlarm('max', currencyId);
+                        lastState.max[currencyId] = true;
+                    }
+                } else {
+                    // Resetar estado quando voltar abaixo do máximo
+                    lastState.max[currencyId] = false;
+                }
+            }
+        }
+
         let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
 
         if (!currentUser) {
             window.location.href = "index.html";
         } else {
             document.getElementById("userDisplayName").textContent = currentUser;
+            loadPriceAlerts();
             loadCryptoInputs();
-            startAutoRefresh(); // Inicia a contagem do refresh
-            startCountdown(); // Inicia a contagem regressiva
+            startAutoRefresh();
+            startCountdown();
         }
 
         function logout() {
-            /* <meta http-equiv="refresh" content="60"> */
-            clearTimeout(refreshTimer); // Para a atualização automática
-            clearInterval(countdownTimer); // Para o contador regressivo
+            clearTimeout(refreshTimer);
+            clearInterval(countdownTimer);
             localStorage.removeItem("savedUser");
             sessionStorage.removeItem("currentUser");
-            window.location.href = "index.html"; // Redireciona imediatamente para a tela de login
+            window.location.href = "index.html";
 
             setTimeout(() => {
-                window.close(); // Fecha a aba (se permitido pelo navegador)
+                window.close();
             }, 1000);
         }
 
@@ -192,62 +320,56 @@
             const container = document.getElementById("cryptoContainer");
             container.innerHTML = "";
 
-            //cryptos.forEach(crypto => {
-            //    const invested = localStorage.getItem(`crypto_${currentUser}_${crypto.id}_invested`) || '';
-            //    const qtde = localStorage.getItem(`crypto_${currentUser}_${crypto.id}_qtde`) || '';
-            //    const moedaNaCompra = localStorage.getItem(`crypto_${currentUser}_${crypto.id}_moedaNaCompra`) || '';
-            //    const gain = localStorage.getItem(`crypto_${currentUser}_${crypto.id}_gain`) || 'R$ 0,00';
             cryptos.forEach(crypto => {
-            let invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.id}_invested`)) || 0;
-            let qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.id}_qtde`)) || 0;
-            let moedaNaCompra = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.id}_moedaNaCompra`)) || 0;
+                let invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.id}_invested`)) || 0;
+                let qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.id}_qtde`)) || 0;
+                let moedaNaCompra = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.id}_moedaNaCompra`)) || 0;
 
-            // Forçar cálculo inicial se necessário
-            if ((!moedaNaCompra || isNaN(moedaNaCompra)) && invested && qtde) {
-                moedaNaCompra = parseFloat((invested / qtde).toFixed(2));
-                localStorage.setItem(`crypto_${currentUser}_${crypto.id}_moedaNaCompra`, moedaNaCompra);
-            }
+                if ((!moedaNaCompra || isNaN(moedaNaCompra)) && invested && qtde) {
+                    moedaNaCompra = parseFloat((invested / qtde).toFixed(2));
+                    localStorage.setItem(`crypto_${currentUser}_${crypto.id}_moedaNaCompra`, moedaNaCompra);
+                }
 
-            const gain = localStorage.getItem(`crypto_${currentUser}_${crypto.id}_gain`) || 'R$ 0,00';
+                const gain = localStorage.getItem(`crypto_${currentUser}_${crypto.id}_gain`) || 'R$ 0,00';
 
-            container.innerHTML += `
-                <div class="widget-container" data-currency="${crypto.id}">
-                    <div class="coin-info">
-                        <div class="coinmarketcap-currency-widget" 
-                            data-currencyid="${crypto.coinId}" 
-                            data-base="BRL" 
-                            data-ticker="true" 
-                            data-rank="true"></div>
+                container.innerHTML += `
+                    <div class="widget-container" data-currency="${crypto.id}">
+                        <div class="coin-info">
+                            <div class="coinmarketcap-currency-widget" 
+                                data-currencyid="${crypto.coinId}" 
+                                data-base="BRL" 
+                                data-ticker="true" 
+                                data-rank="true"></div>
+                        </div>
+                        <div class="calculation-section">
+                            <div class="input-group">
+                                <label>Valor Investido (R$)</label>
+                                <input type="number" class="input-field invested" 
+                                    value="${invested ? invested.toFixed(2) : ''}" 
+                                    min="0" step="0.01"
+                                    onchange="saveCryptoValue('${crypto.id}', 'invested', this.value)">
+                            </div>
+                            <div class="input-group">
+                                <label>Qtde de Moedas</label>
+                                <input type="number" class="input-field purchase-qtde" 
+                                    value="${qtde ? parseFloat(qtde).toFixed(6) : ''}" 
+                                    min="0" step="0.000001"
+                                    onchange="saveCryptoValue('${crypto.id}', 'qtde', this.value)">
+                            </div>
+                            <div class="input-group">
+                                <label>Moeda na Compra (R$)</label>
+                                <input type="number" class="input-field moeda-compra" 
+                                    value="${moedaNaCompra ? moedaNaCompra.toFixed(2) : ''}" 
+                                    min="0" step="0.01"
+                                    onchange="saveCryptoValue('${crypto.id}', 'moedaNaCompra', this.value)">
+                            </div>
+                            <div class="input-group">
+                                <label>Ganho Atual (R$)</label>
+                                <div class="result-field gain" id="gain_${crypto.id}">${gain}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="calculation-section">
-                        <div class="input-group">
-                            <label>Valor Investido (R$)</label>
-                            <input type="number" class="input-field invested" 
-                                value="${invested ? invested.toFixed(2) : ''}" 
-                                min="0" step="0.01"
-                                onchange="saveCryptoValue('${crypto.id}', 'invested', this.value)">
-                        </div>
-                        <div class="input-group">
-                            <label>Qtde de Moedas</label>
-                            <input type="number" class="input-field purchase-qtde" 
-                                value="${qtde ? parseFloat(qtde).toFixed(6) : ''}" 
-                                min="0" step="0.000001"
-                                onchange="saveCryptoValue('${crypto.id}', 'qtde', this.value)">
-                        </div>
-                        <div class="input-group">
-                            <label>Moeda na Compra (R$)</label>
-                            <input type="number" class="input-field moeda-compra" 
-                                value="${moedaNaCompra ? moedaNaCompra.toFixed(2) : ''}" 
-                                min="0" step="0.01"
-                                onchange="saveCryptoValue('${crypto.id}', 'moedaNaCompra', this.value)">
-                        </div>
-                        <div class="input-group">
-                            <label>Ganho Atual (R$)</label>
-                            <div class="result-field gain" id="gain_${crypto.id}">${gain}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+                `;
             });
 
             reloadCoinMarketCapWidget();
@@ -255,29 +377,23 @@
         }
 
         function reloadCoinMarketCapWidget() {
-            // Remove o script existente
             const oldScript = document.querySelector('script[src="https://files.coinmarketcap.com/static/widget/currency.js"]');
             if (oldScript) oldScript.remove();
-            
-            // Adiciona um novo script para forçar a renderização
+
             const newScript = document.createElement('script');
             newScript.src = 'https://files.coinmarketcap.com/static/widget/currency.js';
             document.body.appendChild(newScript);
         }
 
         function saveCryptoValue(currencyId, field, value) {
-            // Novo tratamento para valores decimais
             const parsedValue = parseFloat(value).toFixed(field === 'qtde' ? 6 : 2);
             localStorage.setItem(`crypto_${currentUser}_${currencyId}_${field}`, parsedValue);
 
             const widget = document.querySelector(`#cryptoContainer .widget-container[data-currency="${currencyId}"]`);
-            
-            // Obter valores atualizados
             const invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_invested`)) || 0;
             const qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_qtde`)) || 0;
             const moeda = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`)) || 0;
 
-            // Lógica de sincronização aprimorada
             if (field === 'invested') {
                 const newMoeda = qtde > 0 ? parseFloat((invested / qtde).toFixed(2)) : 0;
                 localStorage.setItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`, newMoeda);
@@ -328,15 +444,16 @@
 
                     const gainElement = document.getElementById(`gain_${currencyId}`);
                     gainElement.textContent = formattedGain;
-                    
-                    // Adiciona classes de cor baseado no valor
+
                     gainElement.classList.remove('positive', 'negative');
                     gainElement.classList.add(gain >= 0 ? 'positive' : 'negative');
                     localStorage.setItem(`crypto_${currentUser}_${currencyId}_gain`, formattedGain);
+
+                    checkPriceAlerts(currentPrice, currencyId);
                 }
             });
         }
-
+            
         function updateAllGains() {
             ["litecoin", "bitcoin", "ethereum"].forEach(cryptoId => calculateGain(cryptoId));
         }
@@ -346,20 +463,5 @@
             updateAllGains();
         };
     </script>
-    <style>
-        /* Adicione estas regras ao CSS existente */
-        .positive {
-            color: #28a745 !important;
-            background-color: #dff5e1 !important;
-            border-color: #bae4c4 !important;
-        }
-    
-        .negative {
-            color: #dc3545 !important;
-            background-color: #f8ccd0 !important;
-            border-color: #f0bbc0 !important;
-        }
-    </style>
-
 </body>
 </html>
