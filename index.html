@@ -226,7 +226,7 @@
         function validatePassword() {
             const password = document.getElementById("password").value;
             const rules = {
-                length: password.length >= 10,
+                length: password.length >= 8,
                 uppercase: /[A-Z]/.test(password),
                 alphanumeric: /[A-Za-z]/.test(password) && /\d/.test(password),
                 noSequence: !/(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(password)
