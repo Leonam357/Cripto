@@ -54,7 +54,7 @@
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 575px;
+            width: 500px;
             border: 1px solid #ccc; /* Adiciona uma borda cinza fina */
         }
 
@@ -79,7 +79,7 @@
             border: 1px solid #dddddd;
             border-radius: 4px;
             font-size: 0.9em;
-            max-width: 100px;
+            max-width: 140px;
             height: 8px;
         }
 
@@ -90,20 +90,28 @@
             border-radius: 4px;
             font-size: 0.9em;
             color: #333;
-            max-width: 100px;
+            max-width: 140px;
             height: 15px;
         }
 
         .coin-info {             /* formato e dimensões dos resultados do coinmarketcap */
-            flex: 1;
-            width: 100px;
+            display: flex;
+            justify-content: space-between; /* Posiciona os elementos lado a lado */
+            align-items: center; /* Alinha verticalmente os elementos */
+            gap: 10px; /* Espaçamento entre os elementos */
+            width: 100%; /* Garante que ocupe toda a largura */
             
         }
 
         .coinmarketcap-currency-widget {    /* Borda esquerda coinmarketcap */
-            width: 20px!important;
-            display: block !important;
-            border: none !important;
+            flex: 1; /* Ocupa o espaço disponível à esquerda */
+            min-width: 200px; /* Define uma largura mínima */
+        }
+        .gain-info {
+            display: flex;
+            flex-direction: column; /* Alinha o rótulo e o valor verticalmente */
+            align-items: flex-end; /* Alinha o conteúdo à direita */
+            gap: 5px; /* Espaçamento entre o rótulo e o valor */
         }
 
         .alert {
@@ -131,7 +139,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 5px;
-            width: 70%; /* Garante que ocupe toda a largura */
+            width: 100%; /* Garante que ocupe toda a largura */
         }
 
         .alert-section .input-group {   /* formato e dimensões dos alertas min e max */
@@ -351,9 +359,15 @@
                                 data-ticker="true" 
                                 data-rank="true">
                             </div>
-                            <div class="input-group">
-                                <label>Ganho R$</label>
-                                <div class="result-field gain" id="gain_${crypto.id}">${gain}</div>
+                            <div class="gain-info">
+                                <div class="input-group">
+                                    <label>Saldo Atual (R$)</label>
+                                    <div class="result-field gain" id="saldo_${crypto.id}">0,00</div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Ganho R$</label>
+                                    <div class="result-field gain" id="gain_${crypto.id}">${gain}</div>
+                                </div>
                             </div>
                         </div>
                         <div class="alert-section">
@@ -464,7 +478,19 @@
                 .then(prices => {
                     ["litecoin", "bitcoin", "uniswap"].forEach(currencyId => {
                         const price = prices[currencyId]?.brl || 0;
+                        const qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_qtde`)) || 0;
+
+                        // Cálculo do saldo atual
+                        const invest = price * qtde;
+                        const formattedInvest = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(invest);
+
+                        // Atualiza o campo "Saldo R$"
+                        document.getElementById(`saldo_${currencyId}`).textContent = formattedInvest;
+
+                        // Atualiza o campo "Preço Atual"
                         document.getElementById(`price_${currencyId}`).textContent = price.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+                        // Verifica alertas de preço e calcula o ganho
                         checkPriceAlerts(currencyId, price);
                         calculateGain(currencyId, prices);
                     });
@@ -492,42 +518,6 @@
             localStorage.setItem(`crypto_${currentUser}_${currencyId}_gain`, formattedGain);
         }
 
-        
-        /*
-        function calculateGain(currencyId, prices) {
-            fetchCurrentPrices().then(prices => {
-                const invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_invested`)) || 0;
-                const qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_qtde`)) || 0;
-                
-                const cryptoData = {
-                    litecoin: prices.litecoin?.brl,
-                    bitcoin: prices.bitcoin?.brl,
-                    ethereum: prices.ethereum?.brl
-                };
-
-                let currentPrice = cryptoData[currencyId] || 0;
-
-                if (currentPrice > 0) {
-					// Atualiza o preço da Litecoin no header
-                    if (currencyId === 'litecoin') {
-                        document.getElementById('litecoinPrice').textContent = 
-                            currentPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    }
-                    let gain = (currentPrice * qtde) - invested;
-                    let formattedGain = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gain);
-
-                    const gainElement = document.getElementById(`gain_${currencyId}`);
-                    gainElement.textContent = formattedGain;
-
-                    gainElement.classList.remove('positive', 'negative');
-                    gainElement.classList.add(gain >= 0 ? 'positive' : 'negative');
-                    localStorage.setItem(`crypto_${currentUser}_${currencyId}_gain`, formattedGain);
-
-                    checkPriceAlerts(currentPrice);
-                }
-            });
-        }
-        */
             
         window.onload = () => {
             fetchCurrentPrices();
