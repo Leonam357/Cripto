@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Crypto Monitor</title>
+    <style>
+        body {
+            background: #000000;
+            color: #fffefe;
+            text-align: center; 
+            padding: 20px; 
+            font-family: Arial, sans-serif;
+        }
+        
+        .login-container { 
+            max-width: 400px; 
+            margin: auto; 
+            padding: 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 10px; 
+            background: #070707; 
+        }
+
+        .input-group { 
+            margin-bottom: 15px; 
+            text-align: left; 
+            position: relative; 
+        }
+
+        .input-group label { 
+            display: block; 
+            font-size: 0.9em; 
+            margin-bottom: 5px; 
+        }
+
+        .input-group input { 
+            font-family: Arial, sans-serif, size = 1em; 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+        }
+
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container input {
+            flex: 1;
+            padding-right: 40px; /* Espaço para o botão de olho */
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .button { 
+            padding: 10px; 
+            width: 100%; 
+            border: none; 
+            border-radius: 5px; 
+            background: #28a745; 
+            color: white; 
+            font-size: 1em; 
+            cursor: pointer; 
+            margin-top: 10px;
+        }
+
+        .button:hover { 
+            background: #218838; 
+        }
+
+        .reset-btn { 
+            padding: 10px; 
+            width: 50%; 
+            border: none; 
+            border-radius: 5px; 
+            background: #dc3545; 
+            font-size: 1em; 
+            cursor: pointer; 
+            margin-top: 20px; /* Aumentado para afastar do botão "Entrar" */
+            margin-left: 25%;
+        }
+
+        .reset-btn:hover { 
+            background: #c82333; 
+        }
+        .small-text {
+            font-size: 12px;
+        }
+        .error-text {
+            color: red;
+        }
+        .success-text {
+            color: black;
+        }
+        .status {
+            font-size: 16px; /* Ajuste o tamanho do ícone, se necessário */
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2 id="form-title">Crypto Monitor - Faça login</h2>
+        <div class="input-group">
+            <label>Usuário (nome ou e-mail):</label>
+            <input type="text" id="username">
+        </div>
+
+        <div class="input-group">
+            <label id="password-label">Senha:</label>
+            <div class="password-container">
+                <input type="password" id="password" oninput="validatePassword()">
+                <span class="eye-icon" onmouseover="togglePassword(true, 'password')" onmouseout="togglePassword(false, 'password')"><img src="eye.png" alt="eye" style="width: 20px; height: 20px;"></span>
+            </div>
+            <ul id="password-rules" style="display: none;">  
+                <li id="rule-length" class="rule small-text"><span class="status"></span> Possuir pelo menos 10 caracteres </li>
+                <li id="rule-uppercase" class="rule small-text"> <span class="status"></span> Possuir pelo menos uma letra maiúscula</li>
+                <li id="rule-alphanumeric" class="rule small-text"> <span class="status"></span> Possuir letras e números</li>
+                <li id="rule-no-sequence" class="rule small-text"> <span class="status"></span> Não usar sequências "1234" ou "AbCd"</li>
+            </ul>
+        </div>
+
+        <div class="input-group" id="confirm-password-group" style="display: none;">
+            <label>Confirme sua senha:</label>
+            <div class="password-container">
+                <input type="password" id="confirm-password" oninput="validateConfirmPassword()">
+                <span class="eye-icon" onmouseover="toggleConfirmPassword(true, 'confirm-password')" onmouseout="toggleConfirmPassword(false, 'confirm-password')"><img src="eye.png" alt="eye" style="width: 20px; height: 20px;"></span>
+            </div>
+            <ul id="confirm-status">
+                <li id="confirm-rule" class="rule small-text"><span class="status"></span> Confirmação de senha: as senhas NÃO são iguais</li>
+            </ul>
+        </div>
+
+        <div class="input-group">
+            <label><input type="checkbox" id="keepLoggedIn"> Manter logado</label>
+            <!-- <button class="button" onclick="login()">Entrar</button> -->
+            <button class="button" id="action-button" onclick="handleAction()">Entrar</button>
+            <button class="button reset-btn" onclick="resetPassword()">Esqueci minha senha</button>
+        </div>
+
+        <div class="input-group">
+            <p id="toggle-form">
+                Não tem uma conta? <a href="#" onclick="toggleForm()">Cadastre-se</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let isSignIn = false;
+
+        function toggleForm() {
+            isSignIn = !isSignIn;
+
+            const formTitle = document.getElementById("form-title");
+            const passwordRules = document.getElementById("password-rules");
+            const confirmPasswordGroup = document.getElementById("confirm-password-group");
+            const actionButton = document.getElementById("action-button");
+            const toggleFormText = document.getElementById("toggle-form");
+            const resetPasswordBtn = document.getElementById("reset-password-btn");
+
+            if (isSignIn) {
+                formTitle.textContent = "Crypto Monitor - Cadastre-se";
+                passwordRules.style.display = "block";
+                confirmPasswordGroup.style.display = "block";
+                actionButton.textContent = "Cadastrar";
+                toggleFormText.innerHTML = 'Já tem uma conta? <a href="#" onclick="toggleForm()">Faça login</a>';
+                resetPasswordBtn.style.display = "none"; // Esconde o botão "Esqueci minha senha"
+            } else {
+                formTitle.textContent = "Crypto Monitor - Faça login";
+                passwordRules.style.display = "none";
+                confirmPasswordGroup.style.display = "none";
+                actionButton.textContent = "Entrar";
+                toggleFormText.innerHTML = 'Não tem uma conta? <a href="#" onclick="toggleForm()">Cadastre-se</a>';
+                resetPasswordBtn.style.display = "block"; // Mostra o botão "Esqueci minha senha"
+            }
+        }
+
+        function handleAction() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const confirmPassword = document.getElementById("confirm-password").value.trim();
+            const keepLoggedIn = document.getElementById("keepLoggedIn").checked;
+
+            if (username === "" || password === "") {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (isSignIn) {
+                // Sign-in logic
+                if (password !== confirmPassword) {
+                    alert("As senhas não coincidem!");
+                    return;
+                }
+
+                if (users[username]) {
+                    alert("Usuário já cadastrado!");
+                    return;
+                }
+
+                users[username] = password;
+                localStorage.setItem("users", JSON.stringify(users));
+                alert("Cadastro realizado com sucesso! Agora você pode fazer login.");
+                toggleForm(); // Volta para o formulário de login
+            } else {
+                // Login logic
+                if (!users[username] || users[username] !== password) {
+                    alert("Usuário ou senha incorretos!");
+                    return;
+                }
+
+                if (keepLoggedIn) {
+                    localStorage.setItem("savedUser", username);
+                }
+
+                sessionStorage.setItem("currentUser", username);
+                window.location.href = "dashboard.html";
+            }
+        }
+        function validatePassword() {
+            const password = document.getElementById("password").value;
+            const rules = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                alphanumeric: /[A-Za-z]/.test(password) && /\d/.test(password),
+                noSequence: !/(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(password)
+            };
+    
+            // document.getElementById("rule-length").querySelector(".status").textContent = rules.length ? "✔️" : "❌";
+            document.getElementById("rule-length").querySelector(".status").textContent = rules.length ? "✔️" : "❌";
+            document.getElementById("rule-uppercase").querySelector(".status").textContent = rules.uppercase ? "✔️" : "❌";
+            document.getElementById("rule-alphanumeric").querySelector(".status").textContent = rules.alphanumeric ? "✔️" : "❌";
+            document.getElementById("rule-no-sequence").querySelector(".status").textContent = rules.noSequence ? "✔️" : "❌";
+
+            // Chama a rotina de confirmação da senha novamente, caso eu altere apenas a senha
+            validateConfirmPassword();
+        }
+    
+        function validateConfirmPassword() {
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+            const confirmStatus = document.getElementById("confirm-rule").querySelector(".status");
+            const confirmText = document.getElementById("confirm-rule");
+
+            if (password === confirmPassword) {
+                confirmStatus.textContent = "✔️";
+                confirmText.lastChild.textContent = " As senhas são iguais";
+                confirmText.classList.remove("error-text");
+                confirmText.classList.add("success-text");
+            } else {
+                confirmStatus.textContent = "❌";
+                confirmText.lastChild.textContent = " Confirmação de senha: as senhas NÃO são iguais";
+                confirmText.classList.remove("success-text");
+                confirmText.classList.add("error-text");
+            }
+        }
+
+    </script>
+
+    <script>
+        if (localStorage.getItem("savedUser")) {
+            window.location.href = "dashboard.html";
+        }
+
+        function login() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const keepLoggedIn = document.getElementById("keepLoggedIn").checked;
+
+            if (username === "" || password === "") {
+                alert("Preencha nome e senha!");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (users[username]) {
+                if (users[username] !== password) {
+                    alert("Senha incorreta!");
+                    return;
+                }
+            } else {
+                users[username] = password;
+                localStorage.setItem("users", JSON.stringify(users));
+            }
+
+            if (keepLoggedIn) {
+                localStorage.setItem("savedUser", username);
+            }
+
+            sessionStorage.setItem("currentUser", username);
+            // Linha modificada no handleAction
+            window.location.href = 'coinlist.html';
+            //window.location.href = 'dashboard.html';
+        }
+
+        function resetPassword() {
+            const username = prompt("Digite seu nome de usuário para redefinir a senha:");
+
+            if (!username) return;
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (!users[username]) {
+                alert("Usuário não encontrado!");
+                return;
+            }
+
+            const newPassword = prompt("Digite sua nova senha:");
+            if (!newPassword) return;
+
+            users[username] = newPassword;
+            localStorage.setItem("users", JSON.stringify(users));
+
+            alert("Senha redefinida com sucesso! Agora você pode fazer login com a nova senha.");
+        }
+
+        function togglePassword(show) {
+            const passwordInput = document.getElementById("password");
+            passwordInput.type = show ? "text" : "password";
+        }
+
+        function toggleConfirmPassword(show, fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            passwordInput.type = show ? "text" : "password";
+        }
+    </script>
+
+</body>
+</html>
