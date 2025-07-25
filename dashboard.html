@@ -286,7 +286,7 @@
 <body style="background: #1a1a1a; color: #ffffff">
     <div class="header-container">
         <h3>Bem-vindo, <span id="userDisplayName"></span></h3>
-        <font size="3px"> (atualiza em: <span class="timer" id="timerDisplay" style="color: #999999;">01:00</span></font>)
+        <font size="3px"> (atualiza em: <span class="timer" id="timerDisplay" style="color: #999999;">00:30</span></font>)
     </div>
 
     <button class="button" id="stopAlarmButton" onclick="stopAlarm()" style="display: none"; >
@@ -332,7 +332,7 @@
         let refreshTimer;
         //document.getElementById('stopAlarmButton').style.display = "none";  //desabilita o botão de alarme
         let countdownTimer;
-        const refreshInterval = 60;
+        const refreshInterval = 30;
         let countdown = refreshInterval;
 
         let alarmPlaying = false;
