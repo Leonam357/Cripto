@@ -374,8 +374,8 @@
         }
 
         function updateCountdownDisplay() {
-            let minutes = Math.floor(countdown / 60);
-            let seconds = countdown % 60;
+            let minutes = Math.floor(countdown / 30);
+            let seconds = countdown % 30;
             document.getElementById("timerDisplay").textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
