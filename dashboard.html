@@ -349,7 +349,7 @@
         let alarmPlaying = false;
         let alarmDisabled = false;         
         
-        let lastState = { litecoin: { min: false, max: false }, bitcoin: { min: false, max: false }, uniswap: { min: false, max: false } };
+        let lastState = { litecoin: { min: false, max: false }, uniswap: { min: false, max: false } };
 
         let currentUser = sessionStorage.getItem("currentUser") || localStorage.getItem("savedUser");
 
@@ -551,19 +551,19 @@
 
             UserCoins.forEach(crypto => {
                 let invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_invested`)) || 0;
+                let taxa = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_taxa`)) || 0;
                 let qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_qtde`)) || 0;
                 let moedaNaCompra = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_moedaNaCompra`)) || 0;
                 let minPriceAlert = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_minPriceAlert`)) || '';
                 let maxPriceAlert = parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_maxPriceAlert`)) || '';
 
                 if ((!moedaNaCompra || isNaN(moedaNaCompra)) && invested && qtde) {
-                    moedaNaCompra = parseFloat((invested / qtde).toFixed(2));
+                    moedaNaCompra = parseFloat((invested / qtde).toFixed(4));
                     localStorage.setItem(`crypto_${currentUser}_${crypto.name}_moedaNaCompra`, moedaNaCompra);
                 }
 
                 const gain = localStorage.getItem(`crypto_${currentUser}_${crypto.name}_gain`) || 'R$ 0,00';
-                fetchCurrentPrices(); 
-
+                
                 container.innerHTML += `
                     <div class="widget-container" data-currency="${crypto.name}">
                         <div class="coin-info">
@@ -618,6 +618,7 @@
                                     oninput="saveCryptoValue('${crypto.name}', 'invested', this.value); calculateGain('${crypto.name}')"
                                     onkeypress="if(event.key === 'Enter') { this.blur(); }">
                             </div>
+                            
                             <div class="input-group">
                                 <label>Qtde Moedas</label>
                                 <input type="number" class="input-field purchase-qtde" 
@@ -634,7 +635,16 @@
                                     oninput="saveCryptoValue('${crypto.name}', 'moedaNaCompra', this.value); calculateGain('${crypto.name}')"
                                     onkeypress="if(event.key === 'Enter') { this.blur(); }">
                             </div>
-                        </div>
+                           
+                        </div> 
+                            <div class="input-group">
+                                <label>R$ Taxa</label>
+                                <input type="text" class="input-field taxa" 
+                                    value="${localStorage.getItem(`crypto_${currentUser}_${crypto.name}_taxa`) ? parseFloat(localStorage.getItem(`crypto_${currentUser}_${crypto.name}_taxa`)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : ''}" 
+                                    min="0" step="1.00"
+                                    oninput="saveCryptoValue('${crypto.name}', 'taxa', this.value); calculateGain('${crypto.name}')"
+                                    onkeypress="if(event.key === 'Enter') { this.blur(); }">
+                            </div>
                         <div id="coinmarketcap-widget-marquee" 
                                 coins="2,7083,5426,1" 
                                 currency="BRL" 
@@ -648,6 +658,7 @@
 
             reloadCoinMarketCapWidget();
             fetchCurrentPrices();
+
         };
 
         /**
@@ -661,6 +672,9 @@
             const newScript = document.createElement('script');
             newScript.src = 'https://files.coinmarketcap.com/static/widget/currency.js';
             document.body.appendChild(newScript);
+            
+            // Após adicionar o script, aguardar um tempo e tentar buscar os preços
+            setTimeout(fetchCurrentPrices, 2000);
         }
 
         /**
@@ -670,48 +684,53 @@
          * @param {string} value - Novo valor
          */
         function saveCryptoValue(currencyId, field, value) {
-            const parsedValue = parseFloat(value).toFixed(field === 'qtde' ? 6 : 2);
+            // Remove formatação de moeda (R$, pontos e vírgulas) antes de converter para número
+            let cleanValue = value;
+            if (typeof value === 'string') {
+                cleanValue = value.replace(/[^0-9,.-]/g, '').replace(',', '.');
+            }
+            
+            const parsedValue = parseFloat(cleanValue).toFixed(field === 'qtde' ? 6 : 2);
             localStorage.setItem(`crypto_${currentUser}_${currencyId}_${field}`, parsedValue);
 
             const widget = document.querySelector(`#cryptoContainer .widget-container[data-currency="${currencyId}"]`);
             const invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_invested`)) || 0;
+            const taxa = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_taxa`)) || 0;
             const qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_qtde`)) || 0;
-            const valor_na_compra = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`)) || 0;
-            gainElement.textContent = 0;
+            const moedaNaCompra = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`)) || 0;
             
-
             if (field === 'invested') {
-                const newQtde = invested > 0 && valor_na_compra > 0 ? parseFloat((invested / valor_na_compra).toFixed(8)) : 0;
-                localStorage.setItem(`crypto_${currentUser}_${currencyId}_qtde`, newQtde);
-                widget.querySelector('.purchase-qtde').value = newQtde;
-                
-                const newMoeda = newQtde > 0 ? parseFloat((invested / newQtde).toFixed(2)) : 0;
-                localStorage.setItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`, newMoeda);
-                widget.querySelector('.moeda-compra').value = newMoeda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                calculateGain(currencyId);
-            } 
-            else if (field === 'qtde') {
-                if (invested > 0) {
-                    const newMoeda = parseFloat((invested / qtde).toFixed(2));
-                    localStorage.setItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`, newMoeda);
-                    widget.querySelector('.moeda-compra').value = newMoeda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    calculateGain(currencyId);
-                }
-                if (valor_na_compra > 0) {
-                    const newInvested = parseFloat((valor_na_compra * qtde).toFixed(2));
-                    localStorage.setItem(`crypto_${currentUser}_${currencyId}_invested`, newInvested);
-                    widget.querySelector('.invested').value = newInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                // Se o usuário alterou o valor investido, recalculamos a quantidade de moedas
+                // mantendo o valor na compra constante
+                if (moedaNaCompra > 0) {
+                    const newQtde = parseFloat(((invested - taxa) / moedaNaCompra).toFixed(8));
+
+                    localStorage.setItem(`crypto_${currentUser}_${currencyId}_qtde`, newQtde);
+                    widget.querySelector('.purchase-qtde').value = newQtde;
+                    widget.querySelector('.purchase-qtde').dispatchEvent(new Event('input'));
                     calculateGain(currencyId);
                 }
             }
-            else if (field === 'moedaNaCompra') {
-                const newQtde = invested > 0 && valor_na_compra > 0 ? parseFloat((invested / valor_na_compra).toFixed(8)) : 0;
-                localStorage.setItem(`crypto_${currentUser}_${currencyId}_qtde`, newQtde);
-                widget.querySelector('.purchase-qtde').value = newQtde;
+            else if (field === 'taxa') {
+                // A taxa não afeta diretamente outros campos, apenas o cálculo de ganho
+                calculateGain(currencyId);
+            }
+            else if (field === 'qtde') {
+                // Se o usuário alterou a quantidade, recalculamos o valor na compra
+                // mantendo o valor na compra constante
                 
-                const newInvested = parseFloat((valor_na_compra * newQtde).toFixed(2));
-                localStorage.setItem(`crypto_${currentUser}_${currencyId}_invested`, newInvested);
-                widget.querySelector('.invested').value = newInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const moedaNaCompra = parseFloat(((invested - taxa)  / qtde).toFixed(4));
+                    localStorage.setItem(`crypto_${currentUser}_${currencyId}_moedaNaCompra`, moedaNaCompra);
+                    widget.querySelector('.moedaNaCompra').value = moedaNaCompra.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    calculateGain(currencyId);
+               
+            }
+            else if (field === 'moedaNaCompra') {
+                // Se o usuário alterou o valor na compra, recalculamos a Qtde
+                // mantendo o valor na compra constante
+                const qtde = parseFloat(((invested - taxa) / moedaNaCompra).toFixed(2));
+                localStorage.setItem(`crypto_${currentUser}_${currencyId}_qtde`, qtde);
+                widget.querySelector('.qtde').value = newInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 calculateGain(currencyId);
             }
 
@@ -724,7 +743,7 @@
         }
 
         /**
-         * Busca os preços atuais das criptomoedas na API CoinGecko
+         * Busca os preços atuais das criptomoedas no widget CoinMarketCap
          * Atualiza os preços, saldos e verifica alertas
          */
         function fetchCurrentPrices() {
@@ -759,7 +778,7 @@
                             qtde = parseFloat((invested / moedaNaCompra).toFixed(8));
                             localStorage.setItem(`crypto_${currentUser}_${coinName}_qtde`, qtde);
                         } else if (qtde > 0 && invested > 0 && moedaNaCompra === 0) {
-                            const novoMoedaNaCompra = parseFloat((invested / qtde).toFixed(2));
+                            const novoMoedaNaCompra = parseFloat((invested / qtde).toFixed(4));
                             localStorage.setItem(`crypto_${currentUser}_${coinName}_moedaNaCompra`, novoMoedaNaCompra);
                         }
 
@@ -804,8 +823,10 @@
          */
         function calculateGain(currencyId, currentPrice = 0) {
             const invested = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_invested`)) || 0;
+            const taxa = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_taxa`)) || 0;
             const qtde = parseFloat(localStorage.getItem(`crypto_${currentUser}_${currencyId}_qtde`)) || 0;
 
+            // Calcula o ganho com base no valor investido bruto (incluindo a taxa)
             const gain = (currentPrice * qtde) - invested;
             const formattedGain = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gain);
 
@@ -824,7 +845,7 @@
     </script>
 
     <div id="cryptoContainer">
-        <div class="coinmarketcap-currency-widget" 
+        <div class="coinmarketcap-currency-widget"  
             data-currencyid="2" 
             data-base="LTC"
             data-secondary="BRL"
@@ -834,7 +855,7 @@
 
     <div class="marquee-container">
         <div id="coinmarketcap-widget-marquee" 
-            coins="2,7083,5426,1" 
+            coins="2,5426,7083"
             currency="BRL" 
             theme="dark" 
             transparent="true" 
