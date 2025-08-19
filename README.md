@@ -1,15 +1,19 @@
 PORTUGUES:
-Pagina HTML que mostra o valor de 3 criptomoedas, e permite ao usuario incluir o montante comprado e a quantidade de moedas comprada.
+Pagina HTML que mostra o valor da moeda escolhida pelo usuario, dentre as 100 moedas mais comercializadas do mercado, e permite 
+ao usuario incluir o montante comprado e a quantidade de moedas comprada.
 
-Via coinMarketcap os valores das 3 moedas são atualizados e o valor do ganho (valor atualizado das moedas * qtde de moedas) é
-calculado automaticamente para acompanhamento.
+Via coinMarketcap os valores da moeda é atualizado a cada 30 segundos e o valor do ganho é calculado automaticamente
+para acompanhamento.
 
 OBS: pode haver diferença nos valores mostrados na tela e o valor do ganho pois para esse ultimo, o valor é atualizado via
-API da coingecko e nao do coinMarketcap.
+API da coingecko e não do coinMarketcap.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENGLISH:
-HTML page that shows the value of 3 cryptocurrencies, and allows the user to include the amount purchased and the number of coins purchased.
+An HTML page that displays the value of the currency chosen by the user, among the 100 most traded currencies on the market, and allows
+the user to enter the amount purchased and the number of coins purchased.
 
-Via coinMarketcap, the values ​​of the 3 coins are updated and the value of the gain (updated value of the coins * number of coins) is automatically calculated for monitoring.
+Via coinMarketcap, the currency values are updated every 30 seconds, and the profit value is calculated automatically
+for monitoring purposes.
 
-NOTE: there may be a difference in the values ​​shown on the screen and the value of the gain, because for the latter, the value is updated via the coingecko API and not the coinMarketcap.
+NOTE: There may be differences between the values displayed on the screen and the profit value, as the latter is updated via
+the coingecko API, not coinMarketcap.
